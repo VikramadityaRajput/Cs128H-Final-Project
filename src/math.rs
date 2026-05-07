@@ -1,25 +1,29 @@
-/// Information Gain = Gini(Parent) - [Weighted Average Gini(Children)]
-pub fn calculate_information_gain(
-    parent_gini: f64,
-    left_gini: f64,
-    left_count: usize,
-    right_gini: f64,
-    right_count: usize,
-) -> f64 {
-    let total = (left_count + right_count) as f64;
-    let weighted_children_gini = (left_count as f64 / total * left_gini) 
-                               + (right_count as f64 / total * right_gini);
-    
-    parent_gini - weighted_children_gini
-}
-pub fn calculate_gini(counts: &[usize], total: usize) -> f64 {
-    if total == 0 { return 0.0; }
-    
-    let mut sum_sq = 0.0;
-    for &count in counts {
-        let p = count as f64 / total as f64;
-        sum_sq += p * p;
+use crate::data::MatchRecord;
+use std::collections::HashMap;
+
+pub fn calculate_gini(data: &[MatchRecord]) -> f64 {
+    if data.is_empty() {
+        return 0.0;
     }
     
-    1.0 - sum_sq
+    let mut counts = HashMap::new();
+    for m in data {
+        *counts.entry(&m.result).or_insert(0) += 1;
+    }
+    
+    let mut impurity = 1.0;
+    let total = data.len() as f64;
+    for count in counts.values() {
+        let prob = (*count as f64) / total;
+        impurity -= prob * prob;
+    }
+    
+    impurity
+}
+
+pub fn calculate_information_gain(parent: &[MatchRecord], left: &[MatchRecord], right: &[MatchRecord]) -> f64 {
+    let weight_left = left.len() as f64 / parent.len() as f64;
+    let weight_right = right.len() as f64 / parent.len() as f64;
+    
+    calculate_gini(parent) - (weight_left * calculate_gini(left)) - (weight_right * calculate_gini(right))
 }
