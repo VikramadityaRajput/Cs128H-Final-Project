@@ -1,5 +1,5 @@
 # Cs128H-Final-Project
-Group Name: Minecraft Decision Trees
+Group Name: Soccer Decision Trees
 Member: Vikramaditya Rajput - vrajput3
 
 
